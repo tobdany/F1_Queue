@@ -18,7 +18,6 @@
 /* USER CODE END Header */
 /* Includes ------------------------------------------------------------------*/
 #include "main.h"
-#include "cmsis_os.h"
 
 /* Private includes ----------------------------------------------------------*/
 /* USER CODE BEGIN Includes */
@@ -51,7 +50,6 @@
 /* Private variables ---------------------------------------------------------*/
 UART_HandleTypeDef huart1;
 
-osThreadId defaultTaskHandle;
 /* USER CODE BEGIN PV */
 
 /* USER CODE END PV */
@@ -60,7 +58,7 @@ osThreadId defaultTaskHandle;
 void SystemClock_Config(void);
 static void MX_GPIO_Init(void);
 static void MX_USART1_UART_Init(void);
-void StartDefaultTask(void const * argument);
+
 
 /* USER CODE BEGIN PFP */
 
@@ -128,14 +126,14 @@ int main(void)
   //se crea la Queue
   St_Queue_Handler = xQueueCreate(2,sizeof(my_struct)); /*puede guardar dos elementos del tamaño
   de la estructura */
-  char *prueba= "Hola mundo\n\n";
+  char *prueba= "Hola mundo\r\n";
   	  HAL_UART_Transmit(&huart1,(uint8_t *)prueba,strlen(prueba),HAL_MAX_DELAY);
 
   if(St_Queue_Handler==0){
-	  char *str= "Unable to create Structure Queue\n\n";
+	  char *str= "Unable to create Structure Queue\r\n";
 	  HAL_UART_Transmit(&huart1,(uint8_t *)str,strlen(str),HAL_MAX_DELAY);
   }else{
-	  char *str= "Structure created\n\n";
+	  char *str= "Structure created\r\n";
 	  HAL_UART_Transmit(&huart1,(uint8_t *)str,strlen(str),HAL_MAX_DELAY);
   }
 
@@ -169,15 +167,12 @@ int main(void)
 
   /* Create the thread(s) */
   /* definition and creation of defaultTask */
-  osThreadDef(defaultTask, StartDefaultTask, osPriorityNormal, 0, 128);
-  defaultTaskHandle = osThreadCreate(osThread(defaultTask), NULL);
 
   /* USER CODE BEGIN RTOS_THREADS */
   /* add threads, ... */
   /* USER CODE END RTOS_THREADS */
 
   /* Start scheduler */
-  osKernelStart();
 
   /* We should never get here as control is now taken by the scheduler */
 
@@ -288,7 +283,7 @@ void Sender1_Task(void *argument){
 	my_struct *ptrtostruct;
 	uint32_t TickDelay=pdMS_TO_TICKS(2000);
 	while(1){
-		char *str= "Entered SENDER1_Task\n";
+		char *str= "Entered SENDER1_Task\r\n";
 		HAL_UART_Transmit(&huart1,(uint8_t*)str,strlen(str),HAL_MAX_DELAY);
 
 		//Allocate memory to the pointer
@@ -297,11 +292,11 @@ void Sender1_Task(void *argument){
 		//cargar los datos a la estructura
 		ptrtostruct->counter=1+indx1;
 		ptrtostruct->large_value=1000+indx1*100;
-		ptrtostruct->str="Hello from sender1";
+		ptrtostruct->str="Hello from sender1\r\n";
 
 		//enviar a la queue
 		if(xQueueSend(St_Queue_Handler,&ptrtostruct,portMAX_DELAY)==pdPASS){
-			char *str2= "Enviado a la queue con éxito, terminando Sender1_Task";
+			char *str2= "Enviado a la queue con éxito, terminando Sender1_Task\r\n";
 			HAL_UART_Transmit(&huart1,(uint8_t*)str2,strlen(str2),HAL_MAX_DELAY);
 		}
 		indx1=indx1+1;
@@ -315,7 +310,7 @@ void Sender2_Task(void *argument){
 	my_struct *ptrtostruct;
 	uint32_t TickDelay=pdMS_TO_TICKS(2000);
 	while(1){
-		char *str= "Entered SENDER2_Task\n";
+		char *str= "Entered SENDER2_Task\r\n";
 		HAL_UART_Transmit(&huart1,(uint8_t*)str,strlen(str),HAL_MAX_DELAY);
 
 		//Allocate memory to the pointer
@@ -324,11 +319,11 @@ void Sender2_Task(void *argument){
 		//cargar los datos a la estructura
 		ptrtostruct->counter=1+indx2;
 		ptrtostruct->large_value=2000+indx2*200;
-		ptrtostruct->str="Hello from sender2";
+		ptrtostruct->str="Hello from sender2\r\n";
 
 		//enviar a la queue
 		if(xQueueSend(St_Queue_Handler,&ptrtostruct,portMAX_DELAY)==pdPASS){
-			char *str2= "Enviado a la queue con éxito, terminando Sender2_Task";
+			char *str2= "Enviado a la queue con éxito, terminando Sender2_Task\r\n";
 			HAL_UART_Transmit(&huart1,(uint8_t*)str2,strlen(str2),HAL_MAX_DELAY);
 		}
 		indx2=indx2+1;
@@ -341,13 +336,13 @@ void Receiver_Task(void *argument){
 	char *ptr;
 
 	while(1){
-		char *str= "Entered Receiver_Task\n";
+		char *str= "Entered Receiver_Task\r\n";
 		HAL_UART_Transmit(&huart1,(uint8_t*)str,strlen(str),HAL_MAX_DELAY);
 
 		//recibir datos de la queue
 		if(xQueueReceive(St_Queue_Handler,&Rptrtostruct,portMAX_DELAY)==pdPASS){
 			ptr=pvPortMalloc(100*sizeof(char));
-			sprintf(ptr,"Received from QUEUE: \n Counter %d\n Large value= %u\n String %s \n\n\n",Rptrtostruct->counter,Rptrtostruct->large_value,Rptrtostruct->str);
+			sprintf(ptr,"Received from QUEUE: \n Counter %d\n Large value= %u\n String %s \r\n\r\n\r\n",Rptrtostruct->counter,Rptrtostruct->large_value,Rptrtostruct->str);
 			HAL_UART_Transmit(&huart1,(uint8_t*)ptr,strlen(ptr),HAL_MAX_DELAY);
 			vPortFree(ptr); //se libera la memoria del pointer
 		}
@@ -359,25 +354,7 @@ void Receiver_Task(void *argument){
 
 
 
-/* USER CODE END 4 */
 
-/* USER CODE BEGIN Header_StartDefaultTask */
-/**
-  * @brief  Function implementing the defaultTask thread.
-  * @param  argument: Not used
-  * @retval None
-  */
-/* USER CODE END Header_StartDefaultTask */
-void StartDefaultTask(void const * argument)
-{
-  /* USER CODE BEGIN 5 */
-  /* Infinite loop */
-  for(;;)
-  {
-    osDelay(1);
-  }
-  /* USER CODE END 5 */
-}
 
 /**
   * @brief  Period elapsed callback in non blocking mode
