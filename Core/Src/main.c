@@ -342,7 +342,7 @@ void Receiver_Task(void *argument){
 		//recibir datos de la queue
 		if(xQueueReceive(St_Queue_Handler,&Rptrtostruct,portMAX_DELAY)==pdPASS){
 			ptr=pvPortMalloc(100*sizeof(char));
-			sprintf(ptr,"Received from QUEUE: \n Counter %d\n Large value= %u\n String %s \r\n\r\n\r\n",Rptrtostruct->counter,Rptrtostruct->large_value,Rptrtostruct->str);
+			sprintf(ptr,"Received from QUEUE: \r\n Counter %d\r\n Large value= %u\r\n String %s \r\n\r\n\r\n",Rptrtostruct->counter,Rptrtostruct->large_value,Rptrtostruct->str);
 			HAL_UART_Transmit(&huart1,(uint8_t*)ptr,strlen(ptr),HAL_MAX_DELAY);
 			vPortFree(ptr); //se libera la memoria del pointer
 		}
