@@ -262,7 +262,7 @@ void Sender1_Task(void *argument){
 
 		//Allocate memory to the pointer
 		ptrtostruct = pvPortMalloc(sizeof(my_struct));
-
+//
 		//cargar los datos a la estructura
 		ptrtostruct->counter=1+indx1;
 		ptrtostruct->large_value=1000+indx1*100;
