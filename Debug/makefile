@@ -56,6 +56,12 @@ default.size.stdout \
 OBJDUMP_LIST += \
 F1_Queue.list \
 
+OBJCOPY_HEX += \
+F1_Queue.hex \
+
+OBJCOPY_BIN += \
+F1_Queue.bin \
+
 
 # All Target
 all: main-build
@@ -79,12 +85,22 @@ F1_Queue.list: $(EXECUTABLES) makefile objects.list $(OPTIONAL_TOOL_DEPS)
 	@echo 'Finished building: $@'
 	@echo ' '
 
+F1_Queue.hex: $(EXECUTABLES) makefile objects.list $(OPTIONAL_TOOL_DEPS)
+	arm-none-eabi-objcopy  -O ihex $(EXECUTABLES) "F1_Queue.hex"
+	@echo 'Finished building: $@'
+	@echo ' '
+
+F1_Queue.bin: $(EXECUTABLES) makefile objects.list $(OPTIONAL_TOOL_DEPS)
+	arm-none-eabi-objcopy  -O binary $(EXECUTABLES) "F1_Queue.bin"
+	@echo 'Finished building: $@'
+	@echo ' '
+
 # Other Targets
 clean:
-	-$(RM) F1_Queue.elf F1_Queue.list F1_Queue.map default.size.stdout
+	-$(RM) F1_Queue.bin F1_Queue.elf F1_Queue.hex F1_Queue.list F1_Queue.map default.size.stdout
 	-@echo ' '
 
-secondary-outputs: $(SIZE_OUTPUT) $(OBJDUMP_LIST)
+secondary-outputs: $(SIZE_OUTPUT) $(OBJDUMP_LIST) $(OBJCOPY_HEX) $(OBJCOPY_BIN)
 
 fail-specified-linker-script-missing:
 	@echo 'Error: Cannot find the specified linker script. Check the linker settings in the build configuration.'
