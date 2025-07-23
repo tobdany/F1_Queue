@@ -127,6 +127,8 @@ int main(void)
   //se crea la Queue
   St_Queue_Handler = xQueueCreate(2,sizeof(my_struct)); /*puede guardar dos elementos del tamaño
   de la estructura */
+  char *prueba= "Hola mundo\n\n";
+  	  HAL_UART_Transmit(&huart1,(uint8_t *)prueba,strlen(prueba),HAL_MAX_DELAY);
 
   if(St_Queue_Handler==0){
 	  char *str= "Unable to create Structure Queue\n\n";
